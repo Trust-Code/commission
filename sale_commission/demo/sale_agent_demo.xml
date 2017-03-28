@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<openerp>
+<odoo>
     <data>
 
         <!-- Create the Commission Types -->
@@ -24,7 +24,7 @@
             <field name="street">56 Beijing street</field>
             <field name="agent" eval="1" />
             <field name="commission" ref="demo_commission_paid" />
-            <field name="lang">en_US</field>
+            <field name="lang"/>
         </record>
 
         <record id="res_partner_eiffel_sale_agent" model="res.partner">
@@ -37,7 +37,7 @@
             <field name="street">Wall Street 2</field>
             <field name="agent" eval="1" />
             <field name="commission" ref="demo_commission" />
-            <field name="lang">en_US</field>
+            <field name="lang"/>
         </record>
 
         <record id="res_partner_tiny_sale_agent" model="res.partner">
@@ -50,8 +50,8 @@
             <field name="street">Belgium Gao</field>
             <field name="agent" eval="1" />
             <field name="commission" ref="demo_commission" />
-            <field name="lang">en_US</field>
+            <field name="lang"/>
         </record>
 
     </data>
-</openerp>
+</odoo>

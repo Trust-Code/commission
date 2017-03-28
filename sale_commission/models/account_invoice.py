@@ -1,26 +1,34 @@
 # -*- coding: utf-8 -*-
 # © 2011 Pexego Sistemas Informáticos (<http://www.pexego.es>)
 # © 2015 Avanzosc (<http://www.avanzosc.es>)
-# © 2015 Pedro M. Baeza (<http://www.serviciosbaeza.com>)
+# © 2015-2016 Pedro M. Baeza (<http://www.serviciosbaeza.com>)
+# © 2015-2016 Oihane Crucelaegui
 # License AGPL-3 - See http://www.gnu.org/licenses/agpl-3.0.html
 
-from openerp import api, fields, models
+from odoo import api, fields, models
 
 
 class AccountInvoice(models.Model):
     """Invoice inherit to add salesman"""
     _inherit = "account.invoice"
 
-    @api.depends('invoice_line.agents.amount')
+    @api.depends('invoice_line_ids.agents.amount')
     def _compute_commission_total(self):
         for record in self:
             record.commission_total = 0.0
-            for line in record.invoice_line:
+            for line in record.invoice_line_ids:
                 record.commission_total += sum(x.amount for x in line.agents)
 
     commission_total = fields.Float(
         string="Commissions", compute="_compute_commission_total",
         store=True)
+
+    # commission_free = fields.Boolean(string="Free of commission",
+                                     # default=False)
+    # commission_free = fields.Boolean(
+    #     string="Comm. free", related="product_id.commission_free",
+    #     store=True, readonly=True)
+
 
     @api.multi
     def action_cancel(self):
@@ -79,7 +87,7 @@ class AccountInvoiceLine(models.Model):
         default=_default_agents, copy=True)
     commission_free = fields.Boolean(
         string="Comm. free", related="product_id.commission_free",
-        store=True, readonly=True)
+        store=True, default=True, readonly=True)
 
 
 class AccountInvoiceLineAgent(models.Model):
@@ -122,8 +130,7 @@ class AccountInvoiceLineAgent(models.Model):
     def onchange_agent(self):
         self.commission = self.agent.commission
 
-    @api.depends('commission.commission_type', 'invoice_line.price_subtotal',
-                 'commission.amount_base_type')
+    @api.depends('invoice_line.price_subtotal')
     def _compute_amount(self):
         for line in self:
             line.amount = 0.0

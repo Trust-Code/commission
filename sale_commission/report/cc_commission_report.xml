@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
+<odoo>
     <data>
         <report auto="True"
             id="settlement_report"
@@ -8,4 +8,4 @@
             rml="sale_commission/report/settlement_report.rml"
             string="Settlement report"/>
     </data>
-</openerp>
+</odoo>
