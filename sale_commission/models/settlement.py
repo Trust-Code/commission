@@ -85,23 +85,23 @@ class Settlement(models.Model):
             company_id=invoice_vals['company_id'])['value'])
         return invoice_vals
 
-    def _prepare_invoice_line(self, settlement, invoice_vals, product):
-        invoice_line_obj = self.env['account.invoice.line']
-        invoice_line_vals = {
+    def _prepare_invoice_line_ids(self, settlement, invoice_vals, product):
+        invoice_line_ids_obj = self.env['account.invoice.line']
+        invoice_line_ids_vals = {
             'product_id': product.id,
             'quantity': 1,
         }
         # Get other invoice line values from product onchange
-        invoice_line_vals.update(invoice_line_obj.product_id_change(
-            product=invoice_line_vals['product_id'], uom_id=False,
-            type=invoice_vals['type'], qty=invoice_line_vals['quantity'],
+        invoice_line_ids_vals.update(invoice_line_ids_obj.product_id_change(
+            product=invoice_line_ids_vals['product_id'], uom_id=False,
+            type=invoice_vals['type'], qty=invoice_line_ids_vals['quantity'],
             partner_id=invoice_vals['partner_id'],
             fposition_id=invoice_vals['fiscal_position'])['value'])
         # Put line taxes
-        invoice_line_vals['invoice_line_tax_id'] = \
-            [(6, 0, tuple(invoice_line_vals['invoice_line_tax_id']))]
+        invoice_line_ids_vals['invoice_line_ids_tax_id'] = \
+            [(6, 0, tuple(invoice_line_ids_vals['invoice_line_ids_tax_id']))]
         # Put commission fee
-        invoice_line_vals['price_unit'] = settlement.total
+        invoice_line_ids_vals['price_unit'] = settlement.total
         # Put period string
         partner = self.env['res.partner'].browse(invoice_vals['partner_id'])
         lang = self.env['res.lang'].search(
@@ -109,12 +109,12 @@ class Settlement(models.Model):
                                                                 'en_US'))])
         date_from = fields.Date.from_string(settlement.date_from)
         date_to = fields.Date.from_string(settlement.date_to)
-        invoice_line_vals['name'] += "\n" + _('Period: from %s to %s') % (
+        invoice_line_ids_vals['name'] += "\n" + _('Period: from %s to %s') % (
             date_from.strftime(lang.date_format),
             date_to.strftime(lang.date_format))
-        return invoice_line_vals
+        return invoice_line_ids_vals
 
-    def _add_extra_invoice_lines(self, settlement):
+    def _add_extra_invoice_line_idss(self, settlement):
         """Hook for adding extra invoice lines.
         :param settlement: Source settlement.
         :return: List of dictionaries with the extra lines.
@@ -126,24 +126,24 @@ class Settlement(models.Model):
         invoice_obj = self.env['account.invoice']
         for settlement in self:
             # select the proper journal according to settlement's amount
-            # considering _add_extra_invoice_lines sum of values
-            extra_invoice_lines = self._add_extra_invoice_lines(settlement)
-            extra_total = sum(x['price_unit'] for x in extra_invoice_lines)
+            # considering _add_extra_invoice_line_idss sum of values
+            extra_invoice_line_idss = self._add_extra_invoice_line_idss(settlement)
+            extra_total = sum(x['price_unit'] for x in extra_invoice_line_idss)
             invoice_journal = (journal if
                                (settlement.total + extra_total) >= 0 else
                                refund_journal)
             invoice_vals = self._prepare_invoice_header(
                 settlement, invoice_journal, date=date)
-            invoice_lines_vals = []
-            invoice_lines_vals.append(self._prepare_invoice_line(
+            invoice_line_idss_vals = []
+            invoice_line_idss_vals.append(self._prepare_invoice_line_ids(
                 settlement, invoice_vals, product))
-            invoice_lines_vals += extra_invoice_lines
+            invoice_line_idss_vals += extra_invoice_line_idss
             # invert invoice values if it's a refund
             if invoice_vals['type'] == 'in_refund':
-                for line in invoice_lines_vals:
+                for line in invoice_line_idss_vals:
                     line['price_unit'] = -line['price_unit']
-            invoice_vals['invoice_line'] = [(0, 0, x)
-                                            for x in invoice_lines_vals]
+            invoice_vals['invoice_line_ids'] = [(0, 0, x)
+                                            for x in invoice_line_idss_vals]
             invoice = invoice_obj.create(invoice_vals)
             settlement.state = 'invoiced'
             settlement.invoice = invoice.id
@@ -160,12 +160,12 @@ class SettlementLine(models.Model):
         relation='settlement_agent_line_rel', column1='settlement_id',
         column2='agent_line_id', required=True)
     date = fields.Date(related="agent_line.invoice_date", store=True)
-    invoice_line = fields.Many2one(
+    invoice_line_ids = fields.Many2one(
         comodel_name='account.invoice.line', store=True,
-        related='agent_line.invoice_line')
+        related='agent_line.invoice_line_ids')
     invoice = fields.Many2one(
         comodel_name='account.invoice', store=True, string="Invoice",
-        related='invoice_line.invoice_id')
+        related='invoice_line_ids.invoice_id')
     agent = fields.Many2one(
         comodel_name="res.partner", readonly=True, related="agent_line.agent",
         store=True)

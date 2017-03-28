@@ -45,8 +45,8 @@ class SaleOrderLine(models.Model):
         store=True, readonly=True)
 
     @api.model
-    def _prepare_order_line_invoice_line(self, line, account_id=False):
-        vals = super(SaleOrderLine, self)._prepare_order_line_invoice_line(
+    def _prepare_order_line_invoice_line_ids(self, line, account_id=False):
+        vals = super(SaleOrderLine, self)._prepare_order_line_invoice_line_ids(
             line, account_id=account_id)
         vals['agents'] = [
             (0, 0, {'agent': x.agent.id,

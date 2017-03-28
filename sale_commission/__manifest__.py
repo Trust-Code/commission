@@ -33,7 +33,7 @@
         "Iván Todorovich <ivan.todorovich@gmail.com",
     ],
     "data": [
-        "security/ir.model.access.csv",
+        #"security/ir.model.access.csv",
         "views/product_template_view.xml",
         "views/res_partner_view.xml",
         "views/sale_commission_view.xml",
@@ -50,5 +50,5 @@
     'test': [
         'test/sale_commission_demo.yml',
     ],
-    'installable': False
+    'installable': True
 }

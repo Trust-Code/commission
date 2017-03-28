@@ -58,7 +58,7 @@
 
         <menuitem name="Commissions"
                   id="menu_sale_commissions_conf"
-                  parent="base.menu_base_config" />
+                  parent="sales_team.menu_sale_config" />
 
         <menuitem name="Commission types"
                   id="menu_sale_commissions_types"

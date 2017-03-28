@@ -295,7 +295,7 @@ msgid "Invoice"
 msgstr ""
 
 #. module: sale_commission
-#: model:ir.model,name:sale_commission.model_account_invoice_line
+#: model:ir.model,name:sale_commission.model_account_invoice_line_ids
 msgid "Invoice Line"
 msgstr ""
 
@@ -306,13 +306,13 @@ msgid "Invoice date"
 msgstr ""
 
 #. module: sale_commission
-#: field:account.invoice.line.agent,invoice_line:0
-#: field:sale.commission.settlement.line,invoice_line:0
+#: field:account.invoice.line.agent,invoice_line_ids:0
+#: field:sale.commission.settlement.line,invoice_line_ids:0
 msgid "Invoice line"
 msgstr ""
 
 #. module: sale_commission
-#: view:account.invoice.line.agent:sale_commission.invoice_line_agent_tree
+#: view:account.invoice.line.agent:sale_commission.invoice_line_ids_agent_tree
 msgid "Invoice line agents and commissions"
 msgstr ""
 

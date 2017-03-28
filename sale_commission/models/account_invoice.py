@@ -11,11 +11,11 @@ class AccountInvoice(models.Model):
     """Invoice inherit to add salesman"""
     _inherit = "account.invoice"
 
-    @api.depends('invoice_line.agents.amount')
+    @api.depends('invoice_line_ids.agents.amount')
     def _compute_commission_total(self):
         for record in self:
             record.commission_total = 0.0
-            for line in record.invoice_line:
+            for line in record.invoice_line_ids:
                 record.commission_total += sum(x.amount for x in line.agents)
 
     commission_total = fields.Float(
@@ -53,7 +53,7 @@ class AccountInvoice(models.Model):
             for agent in agents:
                 agent_vals = agent[2]
                 del agent_vals['invoice']
-                del agent_vals['invoice_line']
+                del agent_vals['invoice_line_ids']
             vals['agents'] = agents
         return res
 
@@ -74,24 +74,26 @@ class AccountInvoiceLine(models.Model):
 
     agents = fields.One2many(
         comodel_name="account.invoice.line.agent",
-        inverse_name="invoice_line", string="Agents & commissions",
+        inverse_name="invoice_line_ids", string="Agents & commissions",
         help="Agents/Commissions related to the invoice line.",
         default=_default_agents, copy=True)
     commission_free = fields.Boolean(
-        string="Comm. free", related="product_id.commission_free",
-        store=True, readonly=True)
+        string="Comm. free",
+        related="product_id.commission_free",
+        store=True,
+        readonly=True)
 
 
 class AccountInvoiceLineAgent(models.Model):
     _name = "account.invoice.line.agent"
 
-    invoice_line = fields.Many2one(
+    invoice_line_ids = fields.Many2one(
         comodel_name="account.invoice.line",
         ondelete="cascade",
         required=True, copy=False)
     invoice = fields.Many2one(
         string="Invoice", comodel_name="account.invoice",
-        related="invoice_line.invoice_id",
+        related="invoice_line_ids.invoice_id",
         store=True)
     invoice_date = fields.Date(
         string="Invoice date",
@@ -99,7 +101,7 @@ class AccountInvoiceLineAgent(models.Model):
         store=True, readonly=True)
     product = fields.Many2one(
         comodel_name='product.product',
-        related="invoice_line.product_id")
+        related="invoice_line_ids.product_id")
     agent = fields.Many2one(
         comodel_name="res.partner",
         domain="[('agent', '=', True)]",
@@ -122,19 +124,19 @@ class AccountInvoiceLineAgent(models.Model):
     def onchange_agent(self):
         self.commission = self.agent.commission
 
-    @api.depends('commission.commission_type', 'invoice_line.price_subtotal',
+    @api.depends('commission.commission_type', 'invoice_line_ids.price_subtotal',
                  'commission.amount_base_type')
     def _compute_amount(self):
         for line in self:
             line.amount = 0.0
-            if (not line.invoice_line.product_id.commission_free and
+            if (not line.invoice_line_ids.product_id.commission_free and
                     line.commission):
                 if line.commission.amount_base_type == 'net_amount':
-                    subtotal = (line.invoice_line.price_subtotal -
-                                (line.invoice_line.product_id.standard_price *
-                                 line.invoice_line.quantity))
+                    subtotal = (line.invoice_line_ids.price_subtotal -
+                                (line.invoice_line_ids.product_id.standard_price *
+                                 line.invoice_line_ids.quantity))
                 else:
-                    subtotal = line.invoice_line.price_subtotal
+                    subtotal = line.invoice_line_ids.price_subtotal
                 if line.commission.commission_type == 'fixed':
                     line.amount = subtotal * (line.commission.fix_qty / 100.0)
                 else:
@@ -154,6 +156,6 @@ class AccountInvoiceLineAgent(models.Model):
                                 for x in line.agent_line))
 
     _sql_constraints = [
-        ('unique_agent', 'UNIQUE(invoice_line, agent)',
+        ('unique_agent', 'UNIQUE(invoice_line_ids, agent)',
          'You can only add one time each agent.')
     ]
