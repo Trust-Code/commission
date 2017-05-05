@@ -28,6 +28,11 @@ class SaleCommission(models.Model):
         selection=[('gross_amount', 'Gross Amount'),
                    ('net_amount', 'Net Amount')],
         string='Base', required=True, default='gross_amount')
+    control_by=fields.Selection([('client','Client'),
+                                 ('product','Product')],
+                                string='Control By',
+                                required=True,
+                                default="client")
 
     @api.multi
     def calculate_section(self, base):

@@ -12,3 +12,13 @@ class ProductTemplate(models.Model):
 
     commission_free = fields.Boolean(string="Free of commission",
                                      default=False)
+    commission = fields.Many2one(
+        string="Commission", comodel_name="sale.commission",
+        help="")
+
+class ProductCategory(models.Model):
+    _inherit = 'product.category'
+
+    commission = fields.Many2one(
+        string="Commission", comodel_name="sale.commission",
+        help="")

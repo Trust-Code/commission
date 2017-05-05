@@ -16,5 +16,29 @@
             </field>
         </record>
 
+        <record id="account_product_form_view_commission" model="ir.ui.view">
+            <field name="name">account.product.form.commission</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="account.product_template_form_view" />
+            <field name="arch" type="xml">
+              <xpath expr="//page/group/group/field[@name='taxes_id']" position="after">
+                <field name="commission"/>
+              </xpath>
+            </field>
+        </record>
+
+        <record id="product_category_form_view_commission" model="ir.ui.view">
+            <field name="name">product.category.form.commission</field>
+            <field name="model">product.category</field>
+            <field name="inherit_id" ref="product.product_category_form_view" />
+            <field name="arch" type="xml">
+              <xpath expr="//group[@name='first']" position="after">
+                <group name="commission" col="2" string="Commission Rules">
+                  <field name="commission"/>
+                </group>
+              </xpath>
+            </field>
+        </record>
+
     </data>
 </openerp>
