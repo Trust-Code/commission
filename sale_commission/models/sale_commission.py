@@ -28,9 +28,9 @@ class SaleCommission(models.Model):
         selection=[('gross_amount', 'Gross Amount'),
                    ('net_amount', 'Net Amount')],
         string='Base', required=True, default='gross_amount')
-    control_by=fields.Selection([('client','Client'),
+    application=fields.Selection([('client','Client'),
                                  ('product','Product')],
-                                string='Control By',
+                                string='Applicated By',
                                 required=True,
                                 default="client")
 

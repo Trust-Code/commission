@@ -24,8 +24,7 @@
                         <group>
                             <group>
                                 <field name="agent_type"/>
-                                <field name="commission"
-                                       attrs="{'required': [('agent', '=', True)]}"/>
+                                <field name="commission" domain="[('application','=','client')]"/>
                             </group>
                             <group>
                                 <field name="settlement"/>

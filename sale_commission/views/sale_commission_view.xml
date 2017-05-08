@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <tree string="Commissions">
                     <field name="name" />
-                    <field name="control_by"/>
+                    <field name="application"/>
                     <field name="commission_type" />
                     <field name="amount_base_type" />
                 </tree>
@@ -26,7 +26,7 @@
                             <field name="active" />
                         </group>
                         <group>
-                            <field name="control_by"/>
+                            <field name="application"/>
                             <field name="commission_type" />
                             <field name="amount_base_type" />
                             <field name="invoice_state"/>

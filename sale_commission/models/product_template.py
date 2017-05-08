@@ -14,11 +14,11 @@ class ProductTemplate(models.Model):
                                      default=False)
     commission = fields.Many2one(
         string="Commission", comodel_name="sale.commission",
-        help="")
+        help="Commission by product")
 
 class ProductCategory(models.Model):
     _inherit = 'product.category'
 
     commission = fields.Many2one(
         string="Commission", comodel_name="sale.commission",
-        help="")
+        help="Commission by category")

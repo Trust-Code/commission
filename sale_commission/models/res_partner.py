@@ -20,13 +20,11 @@ class ResPartner(models.Model):
         string="Creditor/Agent",
         help="Check this field if the partner is a creditor or an agent.")
     agent_type = fields.Selection(
-        selection=[("agent", "External agent")], string="Type", required=True,
-        default="agent")
+        selection=[("agent", "External agent")], string="Type", default="agent")
     commission = fields.Many2one(
         string="Commission", comodel_name="sale.commission",
-        help="This is the default commission used in the sales where this "
-             "agent is assigned. It can be changed on each operation if "
-             "needed.")
+        help="If set, this commission will be used in the sales order. "
+             "If not set, the system will be looking for category or product.")
     settlement = fields.Selection(
         selection=[("monthly", "Monthly"),
                    ("quaterly", "Quarterly"),

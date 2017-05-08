@@ -32,8 +32,7 @@ class SaleOrderLine(models.Model):
             partner = self.env['res.partner'].browse(
                 self.env.context['partner_id'])
             for agent in partner.agents:
-                agents.append({'agent': agent.id,
-                               'commission': agent.commission.id})
+                agents.append({'agent': agent.id})
         return [(0, 0, x) for x in agents]
 
     agents = fields.One2many(
@@ -43,6 +42,14 @@ class SaleOrderLine(models.Model):
     commission_free = fields.Boolean(
         string="Comm. free", related="product_id.commission_free",
         store=True, readonly=True)
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        for line in self.agents:
+            if line.agent.commission:
+                line.commission=line.agent.commission.id
+            elif self.product_id:
+                line.commission=self.product_id.categ_id.commission or self.product_id.commission
 
     @api.model
     def _prepare_order_line_invoice_line_ids(self, line, account_id=False):
