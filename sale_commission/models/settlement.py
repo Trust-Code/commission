@@ -4,7 +4,7 @@
 # © 2015 Pedro M. Baeza (<http://www.serviciosbaeza.com>)
 # License AGPL-3 - See http://www.gnu.org/licenses/agpl-3.0.html
 
-from openerp import api, exceptions, fields, models, _
+from odoo import api, exceptions, fields, models, _
 
 
 class Settlement(models.Model):

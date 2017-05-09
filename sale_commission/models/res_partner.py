@@ -4,7 +4,7 @@
 # © 2015 Pedro M. Baeza (<http://www.serviciosbaeza.com>)
 # License AGPL-3 - See http://www.gnu.org/licenses/agpl-3.0.html
 
-from openerp import api, fields, models
+from odoo import api, fields, models
 
 
 class ResPartner(models.Model):
@@ -20,7 +20,8 @@ class ResPartner(models.Model):
         string="Creditor/Agent",
         help="Check this field if the partner is a creditor or an agent.")
     agent_type = fields.Selection(
-        selection=[("agent", "External agent")], string="Type", default="agent")
+        selection=[("agent", "External agent")], string="Type",
+        default="agent")
     commission = fields.Many2one(
         string="Commission", comodel_name="sale.commission",
         help="If set, this commission will be used in the sales order. "

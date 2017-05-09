@@ -4,7 +4,7 @@
 # © 2015 Pedro M. Baeza (<http://www.serviciosbaeza.com>)
 # License AGPL-3 - See http://www.gnu.org/licenses/agpl-3.0.html
 
-from openerp import api, fields, models
+from odoo import api, fields, models
 
 
 class AccountInvoice(models.Model):
@@ -124,7 +124,8 @@ class AccountInvoiceLineAgent(models.Model):
     def onchange_agent(self):
         self.commission = self.agent.commission
 
-    @api.depends('commission.commission_type', 'invoice_line_ids.price_subtotal',
+    @api.depends('commission.commission_type',
+                 'invoice_line_ids.price_subtotal',
                  'commission.amount_base_type')
     def _compute_amount(self):
         for line in self:
@@ -132,9 +133,10 @@ class AccountInvoiceLineAgent(models.Model):
             if (not line.invoice_line_ids.product_id.commission_free and
                     line.commission):
                 if line.commission.amount_base_type == 'net_amount':
-                    subtotal = (line.invoice_line_ids.price_subtotal -
-                                (line.invoice_line_ids.product_id.standard_price *
-                                 line.invoice_line_ids.quantity))
+                    subtotal = (
+                        line.invoice_line_ids.price_subtotal -
+                        (line.invoice_line_ids.product_id.standard_price *
+                         line.invoice_line_ids.quantity))
                 else:
                     subtotal = line.invoice_line_ids.price_subtotal
                 if line.commission.commission_type == 'fixed':

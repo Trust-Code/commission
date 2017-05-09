@@ -4,7 +4,7 @@
 # © 2015 Pedro M. Baeza (<http://www.serviciosbaeza.com>)
 # License AGPL-3 - See http://www.gnu.org/licenses/agpl-3.0.html
 
-from openerp import api, exceptions, fields, models, _
+from odoo import api, exceptions, fields, models, _
 
 
 class SaleCommission(models.Model):
@@ -28,11 +28,9 @@ class SaleCommission(models.Model):
         selection=[('gross_amount', 'Gross Amount'),
                    ('net_amount', 'Net Amount')],
         string='Base', required=True, default='gross_amount')
-    application=fields.Selection([('client','Client'),
-                                 ('product','Product')],
-                                string='Applicated By',
-                                required=True,
-                                default="client")
+    application = fields.Selection(
+        [('client', 'Client'), ('product', 'Product')],
+        string='Applicated By', required=True, default="client")
 
     @api.multi
     def calculate_section(self, base):
