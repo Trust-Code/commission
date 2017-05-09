@@ -16,7 +16,8 @@
 -
   I confirm the Quotation.
 -
-  !workflow {model: sale.order, action: action_confirm, ref: sale_order_commission_test1}
+  !python {model: sale.order, id: sale_order_commission_test1}:
+    self.action_confirm()
 -
   I create advance invoice where type is 'Invoice all the Sale Order'.
 -
@@ -93,7 +94,8 @@
 -
   I confirm the Quotation.
 -
-  !workflow {model: sale.order, action: action_confirm, ref: sale_order_commission_test2}
+  !python {model: sale.order, id: sale_order_commission_test2}:
+    self.action_confirm()
 -
   I create advance invoice where type is 'Invoice all the Sale Order'.
 -
