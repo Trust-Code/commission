@@ -96,7 +96,12 @@ class SaleOrderLineAgent(models.Model):
                                  line.sale_line.product_uom_qty))
                 else:
                     subtotal = line.sale_line.price_subtotal
+
                 if line.commission.commission_type == 'fixed':
                     line.amount = subtotal * (line.commission.fix_qty / 100.0)
-                else:
-                    line.amount = line.commission.calculate_section(subtotal)
+                elif line.commission.commission_type == 'section_value':
+                    percent = line.commission.percent_section(subtotal)
+                    line.amount = subtotal * percent / 100.0
+                elif line.commission.commission_type == 'section_discount':
+                    percent = line.commission.percent_section(line.discount or 0.0)
+                    line.amount = subtotal * percent / 100.0

@@ -14,9 +14,11 @@ class SaleCommission(models.Model):
     name = fields.Char('Name', required=True)
     commission_type = fields.Selection(
         selection=[("fixed", "Fixed percentage"),
-                   ("section", "By sections")],
+                   ("section_value", "By sections Value"),
+                   ("section_discount", "By sections Discount")],
         string="Type", required=True, default="fixed")
     fix_qty = fields.Float(string="Fixed percentage")
+    rule_based = fields.Many2one('sale.commission', string="Other Rule Base")
     sections = fields.One2many(
         comodel_name="sale.commission.section", inverse_name="commission")
     active = fields.Boolean(default=True)
@@ -33,13 +35,13 @@ class SaleCommission(models.Model):
         string='Applicated By', required=True, default="client")
 
     @api.multi
-    def calculate_section(self, base):
+    def percent_section(self, base):
         self.ensure_one()
         for section in self.sections:
             if section.amount_from <= base <= section.amount_to:
-                return base * section.percent / 100.0
+                return section.percent
+                #return base * section.percent / 100.0
         return 0.0
-
 
 class SaleCommissionSection(models.Model):
     _name = "sale.commission.section"
