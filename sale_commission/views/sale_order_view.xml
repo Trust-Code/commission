@@ -8,7 +8,7 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
                 <field name="order_line" position="attributes">
-                    <attribute name="context">{'partner_id': partner_id}</attribute>
+                    <attribute name="context">{'partner_id': partner_id,'seller':user_id}</attribute>
                 </field>
                 <!--xpath expr="//field[@name='order_line']/tree//field[@name='price_subtotal']" position="after">
                     <field name="commission_free"/>

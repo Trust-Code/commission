@@ -28,11 +28,17 @@ class SaleOrderLine(models.Model):
     @api.model
     def _default_agents(self):
         agents = []
-        if self.env.context.get('partner_id'):
-            partner = self.env['res.partner'].browse(
-                self.env.context['partner_id'])
-            for agent in partner.agents:
-                agents.append({'agent': agent.id})
+
+        partner = self.env.context.get('partner_id') or False
+        partner_id = self.env['res.partner'].browse(partner)
+        for agent in partner_id.agents:
+            agents.append({'agent': agent.id})
+
+        seller = self.env.context.get('seller') or False
+        seller_id = self.env['res.users'].browse(seller)
+        if seller_id and seller_id.partner_id.agent_type=='internal':
+            agents.append({'agent': seller_id.partner_id.id})
+
         return [(0, 0, x) for x in agents]
 
     agents = fields.One2many(
@@ -42,14 +48,6 @@ class SaleOrderLine(models.Model):
     commission_free = fields.Boolean(
         string="Comm. free", related="product_id.commission_free",
         store=True, readonly=True)
-
-    @api.onchange('product_id')
-    def _onchange_product_id(self):
-        for line in self.agents:
-            if line.agent.commission:
-                line.commission=line.agent.commission.id
-            elif self.product_id:
-                line.commission=self.product_id.categ_id.commission or self.product_id.commission
 
     @api.model
     def _prepare_order_line_invoice_line_ids(self, line, account_id=False):
@@ -68,7 +66,7 @@ class SaleOrderLineAgent(models.Model):
     sale_line = fields.Many2one(
         comodel_name="sale.order.line", required=True, ondelete="cascade")
     agent = fields.Many2one(
-        comodel_name="res.partner", required=True, ondelete="restrict",
+        comodel_name="res.partner", ondelete="restrict",
         domain="[('agent', '=', True')]")
     commission = fields.Many2one(
         comodel_name="sale.commission", required=True, ondelete="restrict")
@@ -79,10 +77,18 @@ class SaleOrderLineAgent(models.Model):
          'You can only add one time each agent.')
     ]
 
-    @api.onchange('agent')
-    def onchange_agent(self):
+    @api.onchange('agent','sale_line.product_id')
+    def onchange_agent_product(self):
         self.commission = self.agent.commission
 
+    def _onchange_product_id(self):
+        for line in self.agents:
+            if line.agent.commission:
+                line.commission=line.agent.commission.id
+            elif self.product_id:
+                line.commission=self.product_id.categ_id.commission or self.product_id.commission
+
+    #TODO: Transferir metodo para o write da linha
     @api.depends('commission.commission_type', 'sale_line.price_subtotal',
                  'commission.amount_base_type')
     def _compute_amount(self):
@@ -98,10 +104,42 @@ class SaleOrderLineAgent(models.Model):
                     subtotal = line.sale_line.price_subtotal
 
                 if line.commission.commission_type == 'fixed':
-                    line.amount = subtotal * (line.commission.fix_qty / 100.0)
+                    fix_qty = line.commission.fix_qty
+                    if line.commission.rule_based:
+                        line_agent_id = self.search(
+                           [('commission', '=', line.commission.rule_based.id)])
+                        base_commission = line_agent_id.amount
+                        commission = base_commission * (fix_qty / 100.0)
+                        bsae_commission -= commission
+                        line_agent_id.write({'amount':base_commission})
+                    else:
+                        commission = subtotal * (fix_qty / 100.0)
+
                 elif line.commission.commission_type == 'section_value':
                     percent = line.commission.percent_section(subtotal)
-                    line.amount = subtotal * percent / 100.0
+                    commission = subtotal * percent / 100.0
                 elif line.commission.commission_type == 'section_discount':
                     percent = line.commission.percent_section(line.discount or 0.0)
-                    line.amount = subtotal * percent / 100.0
+                    commission = subtotal * percent / 100.0
+
+                # Busca por regras que por padrão apliquem a divisão da comissão.
+                rule_based = self.env['sale.commission'].search(
+                    [('rule_based','=',line.commission.id),
+                    ('is_always_applied','=',True)])
+
+                # Calcula o valor do rateio e divide entre os pertencentes da regra
+                for rule in rule_based:
+                    inherit_commission =  commission * (rule.fix_qty / 100.0)
+                    commission -= inherit_commission
+                    agents = self.env['res.partner'].search(
+                        [('agent','=', True),('commission','=',irule.id)])
+                    part_commission = inherit_commission / len(agents)
+                    for agent in agents:
+                        self.create({'sale_line':line.sale_line.id,
+                                     'agent':agent.id,
+                                     'commission':rule.id,
+                                     'amount':part_commission,})
+
+
+
+                #line.amount

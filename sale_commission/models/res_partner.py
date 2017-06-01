@@ -20,10 +20,13 @@ class ResPartner(models.Model):
         string="Creditor/Agent",
         help="Check this field if the partner is a creditor or an agent.")
     agent_type = fields.Selection(
-        selection=[("agent", "External agent")], string="Type",
+        selection=[("agent", "External Agent"),
+                   ("internal", "Internal Seller")],
+        string="Type",
         default="agent")
     commission = fields.Many2one(
         string="Commission", comodel_name="sale.commission",
+        domain="[('agent_type','=',agent_type)]",
         help="If set, this commission will be used in the sales order. "
              "If not set, the system will be looking for category or product.")
     settlement = fields.Selection(
