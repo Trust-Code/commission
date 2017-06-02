@@ -16,11 +16,10 @@ class SaleCommission(models.Model):
         selection=[("fixed", "Fixed percentage"),
                    ("section_value", "By sections Value"),
                    ("section_discount", "By sections Discount"),
-                   ("other", "Other Rule")],
+                   ("divided", "divided by Team")],
         string="Type", required=True, default="fixed")
     fix_qty = fields.Float(string="Fixed percentage")
     rule_based = fields.Many2one('sale.commission', string="Other Rule Base")
-    is_always_applied = fields.Boolean('Always Applied?')
     sections = fields.One2many(
         comodel_name="sale.commission.section", inverse_name="commission")
     active = fields.Boolean(default=True)

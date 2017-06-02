@@ -7,18 +7,12 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
-                <field name="order_line" position="attributes">
-                    <attribute name="context">{'partner_id': partner_id,'seller':user_id}</attribute>
-                </field>
-                <!--xpath expr="//field[@name='order_line']/tree//field[@name='price_subtotal']" position="after">
+                <xpath expr="//field[@name='order_line']/form//field[@name='name']" position="after">
+                  <group id='commission' string="Commissions">
                     <field name="commission_free"/>
-                    <field name="agents"
-                           attrs="{'readonly': [('commission_free', '=', True)]}"/>
-                </xpath-->
-                <xpath expr="//field[@name='order_line']/form//field[@name='price_subtotal']" position="after">
-                    <field name="commission_free"/>
-                    <field name="agents"
-                           attrs="{'readonly': [('commission_free', '=', True)]}"/>
+                    <field name="agents" nolabel='1'
+                      attrs="{'invisible': [('commission_free', '=', True)]}"/>
+                  </group>
                 </xpath>
                 <field name="amount_total" position="after">
                     <field name="commission_total"
@@ -35,6 +29,8 @@
                 <tree string="Agents" editable="bottom">
                     <field name="agent"/>
                     <field name="commission"/>
+                    <field name="amount" widget="monetary"/>
+                    <field name="currency_id" invisible='1'/>
                 </tree>
             </field>
         </record>
