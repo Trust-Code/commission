@@ -146,18 +146,23 @@ class SaleOrderLineAgent(models.Model):
             commission_divided = self.env['sale.commission'].search(
                 [('rule_based','=',line.commission.id),
                 ('commission_type','=','divided')])
-
-            # Calcula o valor do rateio e divide entre os pertencentes da regra
-            for rule in commission_divided:
-                inherit_commission = commission * (rule.fix_qty / 100.0)
-                commission -= inherit_commission
-                agents = self.env['res.partner'].search(
-                    [('agent','=', True),('commission', '=', rule.id)])
-                part_commission = inherit_commission / len(agents)
-                for agent in agents:
-                    self.create({'sale_line': line.sale_line.id,
-                                 'agent': agent.id,
-                                 'commission': rule.id,
-                                 'amount': part_commission,
-                                 })
+            if len(commission_divided)>0:
+                commission = self._calculate_commission_divided(
+                    line.sale_line, commission, commission_divided):
             line.amount = commission
+
+    def _calculate_commission_divided(self, line_id, amount, commission_ids):
+            # Calcula o valor do rateio e divide entre os perticipantes da regra
+            for commission_id in commission_ids:
+                inherit_amount = amount * (commission_id.fix_qty / 100)
+                amount -= inherit_amount
+                agents = self.env['res.partner'].search(
+                    [('agent','=', True),('commission', '=', commission_id.id)])
+                amount_divided = inherit_amount / len(agents)
+                for agent in agents:
+                    self.create({'sale_line': line_id.id,
+                                 'agent': agent.id,
+                                 'commission': commission_id.id,
+                                 'amount': amount_divided,
+                                 })
+            return amount
